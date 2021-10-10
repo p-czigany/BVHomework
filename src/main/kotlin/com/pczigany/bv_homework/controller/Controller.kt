@@ -7,7 +7,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -27,7 +34,14 @@ class Controller(
         @PathVariable date: String
     ): ResponseEntity<List<Game>> {
         logger.info("Received get games request for date $date")
-        return ResponseEntity.ok(gameService.getByDate(LocalDate.parse(date, DateTimeFormatter.ISO_DATE)))
+        return ResponseEntity.ok(
+            gameService.getByDate(
+                LocalDate.parse(
+                    date,
+                    DateTimeFormatter.ISO_DATE
+                )
+            )
+        )
     }
 
     @GetMapping("/games/{gameId}")
@@ -44,7 +58,6 @@ class Controller(
         @RequestBody commentRequest: CommentRequest
     ): ResponseEntity<Unit> {
         logger.info("Received add comment request for game $gameId")
-        println("A komment ideje: ${commentRequest.timestamp}, szövege: ${commentRequest.message}")
         return ResponseEntity.ok(gameService.addComment(gameId, commentRequest))
     }
 

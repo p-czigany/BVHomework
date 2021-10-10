@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class BvHomeworkApplication
 
 fun main(args: Array<String>) {
-	runApplication<BvHomeworkApplication>(*args)
+    runApplication<BvHomeworkApplication>(*args)
 }

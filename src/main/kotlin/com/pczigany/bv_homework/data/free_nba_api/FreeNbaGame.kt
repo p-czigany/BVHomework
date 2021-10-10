@@ -1,7 +1,5 @@
 package com.pczigany.bv_homework.data.free_nba_api
 
-import java.time.LocalDate
-
 data class FreeNbaGame(
     val id: String,
     val date: String,

@@ -11,9 +11,7 @@ import com.pczigany.bv_homework.util.ConverterUtil.asDocument
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
 import com.pczigany.bv_homework.data.document.Game as GameDocument
-
 
 @Service
 class GameService(
@@ -22,34 +20,38 @@ class GameService(
     private val freeNbaClientService: FreeNbaClientService
 ) {
     fun getByDate(date: LocalDate): List<GameDocument> {
-        if (!areAllGamesForDatePersisted(date)) {
-            getAndStoreGamesForDate(date)
-        }
+        ensurePersistanceForDate(date)
         return gameRepository.findByDate(date)
     }
 
-    private fun areAllGamesForDatePersisted(date: LocalDate) = persistedDatesRepository.existsById(date)
-
-    private fun getAndStoreGamesForDate(date: LocalDate) {
-        getAndStoreAllGamesForDate(date)
-        persistedDatesRepository.save(PersistedDate(date))
+    private fun ensurePersistanceForDate(date: LocalDate) {
+        if (!persistedDatesRepository.existsById(date)) {
+            getAndStoreAllGamesForDate(date)
+            persistedDatesRepository.save(PersistedDate(date))
+        }
     }
 
     private fun getAndStoreAllGamesForDate(date: LocalDate) {
-        freeNbaClientService.getGamesForDate(date)
+        val gameIds = freeNbaClientService.getGamesForDate(date).map { it.id }
+        gameIds.forEach { gameId -> ensurePersistanceForId(gameId) }
+    }
+
+    private fun ensurePersistanceForId(gameId: String) {
+        if (!gameRepository.existsById(gameId)) {
+            getAndPersistGame(gameId)
+        }
     }
 
     fun getById(gameId: String): GameDocument? {
-        if (!isGamePersisted(gameId)) {
-            getAndPersistGame(gameId)
-        }
+        ensurePersistanceForId(gameId)
         return gameRepository.findByIdOrNull(gameId)
     }
 
-    private fun isGamePersisted(gameId: String) = gameRepository.existsById(gameId)
-
     private fun getAndPersistGame(gameId: String) =
-        saveGameFromNbaGameAndPlayerScores(freeNbaClientService.getGame(gameId), countPlayerScores(freeNbaClientService.getStatsForGame(gameId)))
+        saveGameFromNbaGameAndPlayerScores(
+            freeNbaClientService.getGame(gameId),
+            countPlayerScores(freeNbaClientService.getStatsForGame(gameId))
+        )
 
     private fun countPlayerScores(stats: List<FreeNbaStat>) =
         stats.groupingBy(FreeNbaStat::player)
@@ -62,7 +64,10 @@ class GameService(
             }
             .values.filterNot { it.score == 0 }
 
-    private fun saveGameFromNbaGameAndPlayerScores(freeNbaGame: FreeNbaGame, playerScores: List<PlayerScore>) {
+    private fun saveGameFromNbaGameAndPlayerScores(
+        freeNbaGame: FreeNbaGame,
+        playerScores: List<PlayerScore>
+    ) {
         gameRepository.save(
             GameDocument(
                 gameId = freeNbaGame.id,
@@ -77,20 +82,27 @@ class GameService(
     }
 
     fun addComment(gameId: String, commentRequest: CommentRequest) {
-        if (!isGamePersisted(gameId)) {
-            getAndPersistGame(gameId)
-        }
+        ensurePersistanceForId(gameId)
         val game = gameRepository.findByIdOrNull(gameId)
         if (game != null) {
             game.comments.add(commentRequest.asDocument())
             game.comments.sortBy { it.timestamp }
             gameRepository.save(game)
-        }
+        } // TODO: Exception with not finding the resource
     }
 
     fun updateComment(gameId: String, commentId: String, commentRequest: CommentRequest) {
+        val game = gameRepository.findByIdOrNull(gameId)
+        if (game != null) {
+            game.comments.remove(game.comments.find { it.id == commentId })
+            game.comments.add(commentRequest.asDocument())
+            game.comments.sortBy { it.timestamp }
+            gameRepository.save(game)
+        } // TODO: Exception with not finding the resource
     }
 
     fun deleteComment(gameId: String, commentId: String) {
+        val game = gameRepository.findByIdOrNull(gameId)
+        game?.comments?.remove(game.comments.find { it.id == commentId }) // TODO: Exception with not finding the resource
     }
 }
