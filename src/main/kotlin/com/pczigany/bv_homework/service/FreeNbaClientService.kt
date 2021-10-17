@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -20,15 +21,13 @@ class FreeNbaClientService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun getGame(gameId: String): FreeNbaGame {
+    fun getGame(gameId: String): FreeNbaGame? {
         val response =
             client.newCall(buildRequest("https://free-nba.p.rapidapi.com/games/$gameId")).execute()
 
         val responseJson = response.body?.string()
 
-        logger.info("Games Response: $responseJson")
-
-        return gson.fromJson(responseJson)
+        if (response.isSuccessful) return gson.fromJson(responseJson) else throw Exception()
     }
 
     fun getGamesForDate(date: LocalDate): List<FreeNbaGame> {
@@ -40,9 +39,9 @@ class FreeNbaClientService(
             )
         ).execute()
 
-        val responseJson = response.body?.string()!!
+        logger.info("Games for Date ($date) Response: $response")
 
-        logger.info("Games for Date ($date) Response: $responseJson")
+        val responseJson = response.body?.string()
 
         val paginatedFreeNbaGamesResponse: PaginatedFreeNbaResponse<FreeNbaGame> =
             gson.fromJson(responseJson) // TODO: pagination cycle
@@ -58,9 +57,9 @@ class FreeNbaClientService(
             )
         ).execute()
 
-        val responseJson = response.body?.string()
+        logger.info("Game Stats Response: $response")
 
-        logger.info("Game Stats Response: $responseJson")
+        val responseJson = response.body?.string()
 
         val paginatedFreeNbaStatsResponse: PaginatedFreeNbaResponse<FreeNbaStat> =
             gson.fromJson(responseJson) // TODO: pagination cycle

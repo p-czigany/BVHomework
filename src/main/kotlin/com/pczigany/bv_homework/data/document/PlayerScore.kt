@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 data class PlayerScore(
     @JsonIgnore
-    val id: Number,
+    val id: String,
     val name: String,
     val score: Int
 )
