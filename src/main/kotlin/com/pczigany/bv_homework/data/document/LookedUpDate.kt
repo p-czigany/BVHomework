@@ -4,8 +4,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 
-@Document(collection = "persistedDates")
-data class PersistedDate(
+@Document(collection = "lookedUpDates")
+data class LookedUpDate(
     @Id
-    val id: LocalDate
+    val date: LocalDate
 )

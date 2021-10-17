@@ -1,12 +1,13 @@
 package com.pczigany.bv_homework.service
 
-import com.pczigany.bv_homework.data.document.PersistedDate
+import com.pczigany.bv_homework.data.document.LookedUpDate
 import com.pczigany.bv_homework.data.document.PlayerScore
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaGame
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaStat
 import com.pczigany.bv_homework.data.input.CommentRequest
 import com.pczigany.bv_homework.repository.GameRepository
-import com.pczigany.bv_homework.repository.PersistedDatesRepository
+import com.pczigany.bv_homework.repository.LookedUpDatesRepository
+import com.pczigany.bv_homework.repository.LookedUpGamesRepository
 import com.pczigany.bv_homework.util.ConverterUtil.asDocument
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,8 +18,9 @@ import com.pczigany.bv_homework.data.document.Game as GameDocument
 
 @Service
 class GameService(
+    private val lookedUpGamesRepository: LookedUpGamesRepository,
+    private val lookedUpDatesRepository: LookedUpDatesRepository,
     private val gameRepository: GameRepository,
-    private val persistedDatesRepository: PersistedDatesRepository,
     private val freeNbaClientService: FreeNbaClientService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -29,9 +31,9 @@ class GameService(
     }
 
     private fun ensurePersistanceForDate(date: LocalDate) {
-        if (!persistedDatesRepository.existsById(date)) {
+        if (!lookedUpDatesRepository.existsById(date)) {
             getAndStoreAllGamesForDate(date)
-            persistedDatesRepository.save(PersistedDate(date))
+            lookedUpDatesRepository.save(LookedUpDate(date))
         }
     }
 
@@ -41,7 +43,7 @@ class GameService(
     }
 
     private fun ensurePersistanceForId(gameId: String) {
-        if (!gameRepository.existsById(gameId)) {
+        if (!lookedUpGamesRepository.existsById(gameId)) {
             getAndPersistGame(gameId)
         }
     }
