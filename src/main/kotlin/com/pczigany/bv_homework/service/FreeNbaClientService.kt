@@ -1,9 +1,9 @@
 package com.pczigany.bv_homework.service
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaGame
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaStat
-import com.pczigany.bv_homework.data.free_nba_api.PaginatedFreeNbaGamesResponse
 import com.pczigany.bv_homework.data.free_nba_api.PaginatedFreeNbaResponse
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -40,12 +40,12 @@ class FreeNbaClientService(
             )
         ).execute()
 
-        val jsonString = response.body?.string()!!
+        val responseJson = response.body?.string()!!
 
-        logger.info("Games for Date ($date) Response: $jsonString")
+        logger.info("Games for Date ($date) Response: $responseJson")
 
-        val paginatedFreeNbaGamesResponse: PaginatedFreeNbaGamesResponse =
-            gson.fromJson(jsonString) // TODO: pagination cycle
+        val paginatedFreeNbaGamesResponse: PaginatedFreeNbaResponse<FreeNbaGame> =
+            gson.fromJson(responseJson) // TODO: pagination cycle
         return paginatedFreeNbaGamesResponse.data
     }
 
@@ -58,10 +58,12 @@ class FreeNbaClientService(
             )
         ).execute()
 
-//        logger.info("Game Stats Response: ${response.body?.string()}")
+        val responseJson = response.body?.string()
+
+        logger.info("Game Stats Response: $responseJson")
 
         val paginatedFreeNbaStatsResponse: PaginatedFreeNbaResponse<FreeNbaStat> =
-            gson.fromJson(response.body?.string()!!) // TODO: pagination cycle
+            gson.fromJson(responseJson) // TODO: pagination cycle
         return paginatedFreeNbaStatsResponse.data
     }
 
@@ -73,5 +75,5 @@ class FreeNbaClientService(
         .build()
 
     private inline fun <reified T> Gson.fromJson(json: String?) =
-        fromJson(json, T::class.java)
+        fromJson<T>(json, object : TypeToken<T>() {}.type)
 }
