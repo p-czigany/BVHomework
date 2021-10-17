@@ -21,6 +21,7 @@ dependencies {
 	implementation("com.squareup.okhttp3:okhttp:4.9.2")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	implementation("org.springframework.boot:spring-boot-devtools")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo")

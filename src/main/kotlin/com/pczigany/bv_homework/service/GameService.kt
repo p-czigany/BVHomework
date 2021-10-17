@@ -8,6 +8,8 @@ import com.pczigany.bv_homework.data.input.CommentRequest
 import com.pczigany.bv_homework.repository.GameRepository
 import com.pczigany.bv_homework.repository.PersistedDatesRepository
 import com.pczigany.bv_homework.util.ConverterUtil.asDocument
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -19,6 +21,8 @@ class GameService(
     private val persistedDatesRepository: PersistedDatesRepository,
     private val freeNbaClientService: FreeNbaClientService
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     fun getByDate(date: LocalDate): List<GameDocument> {
         ensurePersistanceForDate(date)
         return gameRepository.findByDate(date)
@@ -33,7 +37,7 @@ class GameService(
 
     private fun getAndStoreAllGamesForDate(date: LocalDate) {
         val gameIds = freeNbaClientService.getGamesForDate(date).map { it.id }
-        gameIds.forEach { gameId -> ensurePersistanceForId(gameId) }
+        gameIds.forEach { gameId -> ensurePersistanceForId(gameId.toString()) }
     }
 
     private fun ensurePersistanceForId(gameId: String) {
@@ -59,7 +63,7 @@ class GameService(
                 PlayerScore(
                     elem.player.id,
                     elem.player.firstName + " " + elem.player.lastName,
-                    acc.score + elem.pts
+                    acc.score + (elem.pts ?: 0)
                 )
             }
             .values.filterNot { it.score == 0 }
@@ -70,11 +74,11 @@ class GameService(
     ) {
         gameRepository.save(
             GameDocument(
-                gameId = freeNbaGame.id,
-                date = LocalDate.parse(freeNbaGame.date.subSequence(0, 10)),
-                homeTeamName = freeNbaGame.homeTeam.fullName,
+                gameId = freeNbaGame.id.toString(),
+                date = LocalDate.parse(freeNbaGame.date?.subSequence(0, 10)),
+                homeTeamName = freeNbaGame.homeTeam?.fullName,
                 homeTeamScore = freeNbaGame.homeTeamScore,
-                visitingTeamName = freeNbaGame.visitorTeam.fullName,
+                visitingTeamName = freeNbaGame.visitorTeam?.fullName,
                 visitingTeamScore = freeNbaGame.visitorTeamScore,
                 playerScores = playerScores
             )

@@ -1,20 +1,15 @@
 package com.pczigany.bv_homework.controller
 
 import com.pczigany.bv_homework.data.document.Game
+import com.pczigany.bv_homework.data.free_nba_api.FreeNbaGame
+import com.pczigany.bv_homework.data.free_nba_api.FreeNbaStat
 import com.pczigany.bv_homework.data.input.CommentRequest
 import com.pczigany.bv_homework.service.GameService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -24,14 +19,14 @@ import java.time.format.DateTimeFormatter
     produces = [MediaType.APPLICATION_JSON_VALUE],
     value = [""]
 )
-class Controller(
+class MainController(
     private val gameService: GameService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @GetMapping("/games/{date}")
+    @GetMapping("/games")
     fun getGamesForDate(
-        @PathVariable date: String
+        @RequestParam date: String
     ): ResponseEntity<List<Game>> {
         logger.info("Received get games request for date $date")
         return ResponseEntity.ok(

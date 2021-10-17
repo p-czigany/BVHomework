@@ -8,11 +8,11 @@ import java.time.LocalDate
 data class Game(
     @Id
     val gameId: String,
-    val date: LocalDate,
-    val homeTeamName: String,
-    val homeTeamScore: Number,
-    val visitingTeamName: String,
-    val visitingTeamScore: Number,
+    val date: LocalDate?,
+    val homeTeamName: String?,
+    val homeTeamScore: Number?,
+    val visitingTeamName: String?,
+    val visitingTeamScore: Number?,
     val comments: MutableList<Comment> = mutableListOf(),
-    val playerScores: List<PlayerScore>
+    val playerScores: List<PlayerScore>?
 )
