@@ -77,12 +77,5 @@ internal class GameControllerTest {
             result.statusCode shouldBe OK
             result.body shouldBe game
         }
-
-        @Test
-        fun `fail to get game by Id because it doesn't exist - respond with 404`() {
-            every { gameService.getById("gameId") } returns null
-
-            subject.getGameById("gameId") shouldBe ResponseEntity.notFound().build()
-        }
     }
 }
