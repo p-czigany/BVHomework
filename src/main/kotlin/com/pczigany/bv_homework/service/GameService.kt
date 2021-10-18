@@ -5,16 +5,15 @@ import com.pczigany.bv_homework.data.document.LookedUpGame
 import com.pczigany.bv_homework.data.document.PlayerScore
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaGame
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaStat
-import com.pczigany.bv_homework.data.input.CommentRequest
 import com.pczigany.bv_homework.repository.GameRepository
 import com.pczigany.bv_homework.repository.LookedUpDatesRepository
 import com.pczigany.bv_homework.repository.LookedUpGamesRepository
-import com.pczigany.bv_homework.util.ConverterUtil.asDocument
+import com.pczigany.bv_homework.util.ConverterUtil.toDate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.util.Date
 import com.pczigany.bv_homework.data.document.Game as GameDocument
 
 @Service
@@ -26,31 +25,33 @@ class GameService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    fun getByDate(date: LocalDate): List<GameDocument> {
+    fun getByDate(date: Date): List<GameDocument> {
         ensurePersistenceForDate(date)
         return gameRepository.findByDate(date)
     }
 
-    private fun ensurePersistenceForDate(date: LocalDate) {
+    private fun ensurePersistenceForDate(date: Date) {
         if (!lookedUpDatesRepository.existsById(date)) {
+            logger.info("We still have to try caching date $date.")
             getAndStoreAllGamesForDate(date)
             lookedUpDatesRepository.save(LookedUpDate(date))
+        } else {
+            logger.info("We have already tried to cache games for date $date.")
         }
     }
 
-    private fun getAndStoreAllGamesForDate(date: LocalDate) {
+    private fun getAndStoreAllGamesForDate(date: Date) {
         val gameIds = freeNbaClientService.getGamesForDate(date).map { it.id }
         gameIds.forEach { gameId -> ensurePersistenceForId(gameId.toString()) }
     }
 
     fun ensurePersistenceForId(gameId: String) {
-        when (lookedUpGamesRepository.existsById(gameId)) {
-            true -> logger.info("We have already tried to cache game $gameId.")
-            false -> {
-                logger.info("We still have to try caching game $gameId.")
-                getAndPersistGame(gameId)
-                lookedUpGamesRepository.save(LookedUpGame(gameId))
-            }
+        if (lookedUpGamesRepository.existsById(gameId)) {
+            logger.info("We have already tried to cache game $gameId.")
+        } else {
+            logger.info("We still have to try caching game $gameId.")
+            getAndPersistGame(gameId)
+            lookedUpGamesRepository.save(LookedUpGame(gameId))
         }
     }
 
@@ -86,11 +87,10 @@ class GameService(
         freeNbaGame: FreeNbaGame,
         playerScores: List<PlayerScore>
     ) {
-        logger.info("I want to save the composed game.")
-        gameRepository.save(
+        val game = gameRepository.save(
             GameDocument(
                 gameId = freeNbaGame.id.toString(),
-                date = LocalDate.parse(freeNbaGame.date?.subSequence(0, 10)),
+                date = freeNbaGame.date?.subSequence(0, 10)?.toDate(),
                 homeTeamName = freeNbaGame.homeTeam?.fullName,
                 homeTeamScore = freeNbaGame.homeTeamScore,
                 visitingTeamName = freeNbaGame.visitorTeam?.fullName,
@@ -98,6 +98,6 @@ class GameService(
                 playerScores = playerScores
             )
         )
-        logger.info("Game Successfully saved.")
+        logger.info("Game $game saved successfully.")
     }
 }

@@ -5,14 +5,14 @@ import com.google.gson.reflect.TypeToken
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaGame
 import com.pczigany.bv_homework.data.free_nba_api.FreeNbaStat
 import com.pczigany.bv_homework.data.free_nba_api.PaginatedFreeNbaResponse
+import com.pczigany.bv_homework.exception.FreeNbaApiException
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.util.Date
 
 @Service
 class FreeNbaClientService(
@@ -25,12 +25,16 @@ class FreeNbaClientService(
         val response =
             client.newCall(buildRequest("https://free-nba.p.rapidapi.com/games/$gameId")).execute()
 
+        logger.info("Get Game for id $gameId response: $response")
+
+        if (!response.isSuccessful) throw FreeNbaApiException()
+
         val responseJson = response.body?.string()
 
-        if (response.isSuccessful) return gson.fromJson(responseJson) else throw Exception()
+        return gson.fromJson(responseJson)
     }
 
-    fun getGamesForDate(date: LocalDate): List<FreeNbaGame> {
+    fun getGamesForDate(date: Date): List<FreeNbaGame> {
         val response = client.newCall(
             buildRequest(
                 ("https://free-nba.p.rapidapi.com" + "/games").toHttpUrlOrNull()!!.newBuilder()
@@ -41,10 +45,12 @@ class FreeNbaClientService(
 
         logger.info("Games for Date ($date) Response: $response")
 
+        if (!response.isSuccessful) throw FreeNbaApiException()
+
         val responseJson = response.body?.string()
 
         val paginatedFreeNbaGamesResponse: PaginatedFreeNbaResponse<FreeNbaGame> =
-            gson.fromJson(responseJson) // TODO: pagination cycle
+            gson.fromJson(responseJson)
         return paginatedFreeNbaGamesResponse.data
     }
 
@@ -59,10 +65,12 @@ class FreeNbaClientService(
 
         logger.info("Game Stats Response: $response")
 
+        if (!response.isSuccessful) throw FreeNbaApiException()
+
         val responseJson = response.body?.string()
 
         val paginatedFreeNbaStatsResponse: PaginatedFreeNbaResponse<FreeNbaStat> =
-            gson.fromJson(responseJson) // TODO: pagination cycle
+            gson.fromJson(responseJson)
         return paginatedFreeNbaStatsResponse.data
     }
 

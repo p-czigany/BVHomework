@@ -2,13 +2,13 @@ package com.pczigany.bv_homework.data.document
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDate
+import java.util.Date
 
 @Document(collection = "games")
 data class Game(
     @Id
     val gameId: String,
-    val date: LocalDate?,
+    val date: Date?,
     val homeTeamName: String?,
     val homeTeamScore: Number?,
     val visitingTeamName: String?,

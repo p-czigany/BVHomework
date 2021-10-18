@@ -1,6 +1,8 @@
 package com.pczigany.bv_homework.service
 
 import com.pczigany.bv_homework.data.input.CommentRequest
+import com.pczigany.bv_homework.exception.CommentNotFoundException
+import com.pczigany.bv_homework.exception.GameNotFoundException
 import com.pczigany.bv_homework.repository.GameRepository
 import com.pczigany.bv_homework.util.ConverterUtil.asDocument
 import org.slf4j.Logger
@@ -17,26 +19,28 @@ class CommentService(
 
     fun addComment(gameId: String, commentRequest: CommentRequest) {
         gameService.ensurePersistenceForId(gameId)
-        val game = gameRepository.findByIdOrNull(gameId)
-        if (game != null) {
-            game.comments.add(commentRequest.asDocument())
-            game.comments.sortBy { it.timestamp }
-            gameRepository.save(game)
-        } // TODO: Exception with not finding the resource
+        val game = gameRepository.findByIdOrNull(gameId) ?: throw GameNotFoundException()
+        game.comments.add(commentRequest.asDocument())
+        game.comments.sortByDescending { it.timestamp }
+        gameRepository.save(game)
+        logger.info("Comment added to game $gameId with the message of ${commentRequest.message}.")
     }
 
     fun updateComment(gameId: String, commentId: String, commentRequest: CommentRequest) {
-        val game = gameRepository.findByIdOrNull(gameId)
-        if (game != null) {
-            game.comments.remove(game.comments.find { it.id == commentId })
-            game.comments.add(commentRequest.asDocument())
-            game.comments.sortBy { it.timestamp }
-            gameRepository.save(game)
-        } // TODO: Exception with not finding the resource
+        val game = gameRepository.findByIdOrNull(gameId) ?: throw GameNotFoundException()
+        game.comments.remove(game.comments.find { it.id == commentId }
+            ?: throw CommentNotFoundException())
+        game.comments.add(commentRequest.asDocument())
+        game.comments.sortByDescending { it.timestamp }
+        gameRepository.save(game)
+        logger.info("Comment $commentId updated.")
     }
 
     fun deleteComment(gameId: String, commentId: String) {
-        val game = gameRepository.findByIdOrNull(gameId)
-        game?.comments?.remove(game.comments.find { it.id == commentId }) // TODO: Exception with not finding the resource
+        val game = gameRepository.findByIdOrNull(gameId) ?: throw GameNotFoundException()
+        game.comments.remove(game.comments.find { it.id == commentId }
+            ?: throw CommentNotFoundException())
+        gameRepository.save(game)
+        logger.info("Comment $commentId deleted.")
     }
 }
