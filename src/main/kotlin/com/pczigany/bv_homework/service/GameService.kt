@@ -41,7 +41,8 @@ class GameService(
     }
 
     private fun getAndStoreAllGamesForDate(date: Date) {
-        val gameIds = freeNbaClientService.getGamesForDate(date).map { it.id }
+        val gameIds = freeNbaClientService.getGamesForDate(date)
+            .map { it.id } // TODO: dont' do this -- harder to test this way
         gameIds.forEach { gameId -> ensurePersistenceForId(gameId.toString()) }
     }
 
