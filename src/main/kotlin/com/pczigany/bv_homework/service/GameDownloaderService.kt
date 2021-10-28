@@ -8,8 +8,10 @@ import com.pczigany.bv_homework.repository.GameRepository
 import com.pczigany.bv_homework.util.ConverterUtil.toDate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.Date
 
+@Service
 class GameDownloaderService(
     private val gameRepository: GameRepository,
     private val freeNbaClientService: FreeNbaClientService

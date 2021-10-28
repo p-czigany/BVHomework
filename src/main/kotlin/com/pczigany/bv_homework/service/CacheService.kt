@@ -2,8 +2,10 @@ package com.pczigany.bv_homework.service
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.Date
 
+@Service
 class CacheService(
     private val cacheCheckerService: CacheCheckerService,
     private val gameDownloaderService: GameDownloaderService
@@ -21,7 +23,7 @@ class CacheService(
         }
     }
 
-    fun ensurePersistenceForId(gameId: String) {
+    fun ensurePersistenceForGameId(gameId: String) {
         if (cacheCheckerService.isGameCached(gameId)) {
             logger.info("We have already tried to cache game $gameId.")
         } else {

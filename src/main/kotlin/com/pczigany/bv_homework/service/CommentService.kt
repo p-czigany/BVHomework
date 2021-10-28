@@ -18,7 +18,7 @@ class CommentService(
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun addComment(gameId: String, commentRequest: CommentRequest) {
-        gameService.ensurePersistenceForId(gameId)
+        gameService.ensurePersistenceForGameId(gameId)
         val game = gameRepository.findByIdOrNull(gameId) ?: throw GameNotFoundException()
         game.comments.add(commentRequest.asDocument())
         game.comments.sortByDescending { it.timestamp }

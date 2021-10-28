@@ -6,8 +6,10 @@ import com.pczigany.bv_homework.repository.LookedUpDateRepository
 import com.pczigany.bv_homework.repository.LookedUpGameRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.Date
 
+@Service
 class CacheCheckerService(
     private val lookedUpGameRepository: LookedUpGameRepository,
     private val lookedUpDateRepository: LookedUpDateRepository

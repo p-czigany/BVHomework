@@ -21,7 +21,7 @@ class GameService(
     }
 
     fun getById(gameId: String): GameDocument? {
-        cacheService.ensurePersistenceForId(gameId)
+        cacheService.ensurePersistenceForGameId(gameId)
         return gameRepository.findByIdOrNull(gameId)
     }
 }
