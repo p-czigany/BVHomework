@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.Date
 
 @Repository
-interface LookedUpDatesRepository : MongoRepository<LookedUpDate, Date>
+interface LookedUpDateRepository : MongoRepository<LookedUpDate, Date>

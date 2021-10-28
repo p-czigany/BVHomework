@@ -7,11 +7,9 @@ import com.pczigany.bv_homework.data.document.Comment as CommentDocument
 
 object ConverterUtil {
 
-    fun CommentRequest.asDocument() =
-        CommentDocument(timestamp = this.timestamp, message = this.message)
+    fun CommentRequest.asDocument() = CommentDocument(timestamp = this.timestamp, message = this.message)
 
-    fun String.toDate(): Date =
-        SimpleDateFormat("yyyy-MM-dd").parse(this)
+    fun String.toDate(): Date = SimpleDateFormat("yyyy-MM-dd").parse(this)
 
     fun CharSequence.toDate() = this.toString().toDate()
 }

@@ -7,7 +7,7 @@ import java.util.Date
 @Document(collection = "games")
 data class Game(
     @Id
-    val gameId: String,
+    var gameId: String,
     val date: Date?,
     val homeTeamName: String?,
     val homeTeamScore: Number?,

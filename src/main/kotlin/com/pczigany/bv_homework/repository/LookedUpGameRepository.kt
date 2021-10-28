@@ -5,4 +5,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface LookedUpGamesRepository : MongoRepository<LookedUpGame, String>
+interface LookedUpGameRepository : MongoRepository<LookedUpGame, String>

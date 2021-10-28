@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class CommentService(
     private val gameRepository: GameRepository,
-    private val gameService: GameService
+    private val gameService: CacheService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
